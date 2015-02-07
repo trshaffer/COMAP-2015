@@ -25,19 +25,19 @@ class Cel:
         self.initial_population = susceptible + exposed + \
             infectious + recovered
 
-        self._susceptible = dict()
+        self._susceptible = {}
         self._susceptible[self.front_buffer] = susceptible
         self._susceptible[self.back_buffer] = susceptible
 
-        self._exposed = dict()
+        self._exposed = {}
         self._exposed[self.front_buffer] = exposed
         self._exposed[self.back_buffer] = exposed
 
-        self._infectious = dict()
+        self._infectious = {}
         self._infectious[self.front_buffer] = infectious
         self._infectious[self.back_buffer] = infectious
 
-        self._recovered = dict()
+        self._recovered = {}
         self._recovered[self.front_buffer] = recovered
         self._recovered[self.back_buffer] = recovered
 
@@ -77,6 +77,9 @@ class Cel:
     def flip(self):
         self.front_buffer, self.back_buffer = \
             self.back_buffer, self.front_buffer
+
+    def infect(self, potential):
+        pass
 
     @property
     def susceptible(self):
