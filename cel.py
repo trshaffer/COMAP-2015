@@ -15,9 +15,7 @@
 # for explanation of parameters, see http://is.gd/aeMk9q (if it's up...)
 
 class Cel:
-    def __init__(self,
-            susceptible=0, exposed=0, infectious=0, recovered=0,
-            transmission_rate=0.0, fatality_rate=0.0):
+    def __init__(self, susceptible=0, exposed=0, infectious=0, recovered=0):
         self.front_buffer = "front"
         self.back_buffer = "back"
         self.timestep = 1 # probably measured in days
@@ -41,8 +39,8 @@ class Cel:
         self._recovered[self.front_buffer] = recovered
         self._recovered[self.back_buffer] = recovered
 
-        self.transmission_rate = transmission_rate
-        self.fatality_rate = fatality_rate
+        self.transmission_rate = 0.45
+        self.fatality_rate = 0.48
 
         # DO NOT set these to 0
         self.incubation_duration = 5.3
@@ -79,7 +77,13 @@ class Cel:
             self.back_buffer, self.front_buffer
 
     def infect(self, potential):
-        pass
+        # victims is the number of new cases given some infection potential
+        # victims are moved from the susceptible to the exposed group
+        # this could be some stochastic thing
+        # make sure you don't take more victims than you have!
+        victims = min(potential, self.susceptible)                           ##
+        self._susceptible[self.back_buffer] -= victims
+        self._exposed[self.back_buffer] += victims
 
     @property
     def susceptible(self):
@@ -101,6 +105,11 @@ class Cel:
     def population(self):
         return self.susceptible + self.exposed + \
             self.infectious + self.recovered
+
+    @property
+    def casualties(self):
+        return self.infectious + self.initial_population - \
+            self.population
 
     @property
     def basic_reproduction_number(self):

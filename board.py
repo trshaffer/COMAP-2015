@@ -15,31 +15,44 @@
 class Board:
     def __init__(self):
         self._board = {}
+        self.header = {}
 
     @staticmethod
     def distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
     def potential(self, at, point):
-        return self._board[point].infectious / Board.distance(at, point)
+        if at == point:
+            return 0
+        else:
+            # this could be multiplied by a constant, squared, etc.
+            # the infectious part is the number of infectious people at some
+            # point and distance is that point's distance
+            return self._board[point].infectious / Board.distance(at, point) ##
+
+    def strip(self):
+        self._board = self.living
 
     @property
     def living(self):
-        return {k: v for k, v in self._board.items() if v.population >= 1}
+        # this is the minimum number of people to cause the cell to be
+        # processed. increasing this constant decreases computational
+        # workload but ignores some data
+        return {k: v for k, v in self._board.items() if v.population >= 1}   ##
 
     @property
     def infected(self):
-        # maybe change if starting from half a case is desirable
-        return {k: v for k, v in self._board.items() if v.infectious >= 1}
+        # same as above
+        return {k: v for k, v in self._board.items() if v.infectious >= 1}   ##
 
     def tick(self):
         current_living = self.living
         current_infected = self.infected
         for c in current_living.keys():
-            c.tick()
-            infection_potential = 0
+            self._board[c].tick()
+            infection_potential = 0.0
             for i in current_infected:
                 infection_potential += self.potential(c, i)
-            c.infect(infection_potential)
+            self._board[c].infect(infection_potential)
         for c in current_living:
-            c.flip()
+            self._board[c].flip()
