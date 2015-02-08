@@ -33,6 +33,26 @@ class Board:
     def strip(self):
         self._board = self.living
 
+    def expose(self, people, *cels):
+        for c in cels:
+            self._board[c].expose(people)
+            self._board[c].flip()
+
+    def infect(self, people, *cels):
+        for c in cels:
+            self._board[c].infect(people)
+            self._board[c].flip()
+
+    def vaccinate(self, people, *cels):
+        for c in cels:
+            self._board[c].vaccinate(people)
+            self._board[c].flip()
+
+    def treat(self, people, *cels):
+        for c in cels:
+            self._board[c].treat(people)
+            self._board[c].flip()
+
     @property
     def living(self):
         # this is the minimum number of people to cause the cell to be
@@ -45,14 +65,15 @@ class Board:
         # same as above
         return {k: v for k, v in self._board.items() if v.infectious >= 1}   ##
 
-    def tick(self):
-        current_living = self.living
-        current_infected = self.infected
-        for c in current_living.keys():
-            self._board[c].tick()
-            infection_potential = 0.0
-            for i in current_infected:
-                infection_potential += self.potential(c, i)
-            self._board[c].infect(infection_potential)
-        for c in current_living:
-            self._board[c].flip()
+    def tick(self, duration=1):
+        for i in range(duration):
+            current_living = self.living
+            current_infected = self.infected
+            for c in current_living.keys():
+                self._board[c].tick()
+                infection_potential = 0.0
+                for i in current_infected:
+                    infection_potential += self.potential(c, i)
+                self._board[c].infect(infection_potential)
+            for c in current_living:
+                self._board[c].flip()

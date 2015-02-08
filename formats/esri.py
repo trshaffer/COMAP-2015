@@ -17,22 +17,34 @@ from board import Board
 from cel import Cel
 
 
-def _output_board(filepath, pop_map, attrib):
+def _export_board(filepath, pop_map, selection):
     with open(filepath, 'w') as f:
         for e in pop_map.header.keys():
             f.write('%s %s\n' % (e, pop_map.header[e]))
         for y in range(int(pop_map.header['nrows'])):
             for x in range(int(pop_map.header['ncols'])):
-                f.write('%f' % pop_map._board[x, y].__getattribute__(attrib))
+                try:
+                    f.write('%f' % selection(pop_map._board[x, y]))
+                except KeyError:
+                    f.write(pop_map.header['NODATA_value'])
                 if x < int(pop_map.header['ncols']) - 1:
                     f.write(' ')
             f.write('\n')
 
-def output_population(filepath, pop_map):
-    _output_board(filepath, pop_map, 'population')
+def population_exporter(cel):
+    return cel.population
 
-def output_casualties(filepath, pop_map):
-    _output_board(filepath, pop_map, 'casualties')
+def casualty_exporter(cel):
+    return cel.casualties
+
+def population_importer(val):
+    return Cel(susceptible = float(val))
+
+def export_population(filepath, pop_map):
+    _export_board(filepath, pop_map, population_exporter)
+
+def export_casualties(filepath, pop_map):
+    _export_board(filepath, pop_map, casualty_exporter)
 
 def import_population(filepath):
     pop_map = Board()
@@ -48,8 +60,7 @@ def import_population(filepath):
     for y in range(int(pop_map.header['nrows'])):
         for x in range(int(pop_map.header['ncols'])):
             c = pop_cells.pop(0)
-            if c == pop_map.header['NODATA_value']:
-                c = 0
-            pop_map._board[x, y] = Cel(susceptible=float(c))
+            if c != pop_map.header['NODATA_value']:
+                pop_map._board[x, y] = Cel(susceptible=float(c))
 
     return pop_map

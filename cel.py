@@ -14,6 +14,7 @@
 
 # for explanation of parameters, see http://is.gd/aeMk9q (if it's up...)
 
+
 class Cel:
     def __init__(self, susceptible=0, exposed=0, infectious=0, recovered=0):
         self.front_buffer = "front"
@@ -76,14 +77,25 @@ class Cel:
         self.front_buffer, self.back_buffer = \
             self.back_buffer, self.front_buffer
 
-    def infect(self, potential):
-        # victims is the number of new cases given some infection potential
-        # victims are moved from the susceptible to the exposed group
-        # this could be some stochastic thing
-        # make sure you don't take more victims than you have!
-        victims = min(potential, self.susceptible)                           ##
+    def expose(self, quantity):
+        victims = min(quantity, self.susceptible)
         self._susceptible[self.back_buffer] -= victims
         self._exposed[self.back_buffer] += victims
+
+    def infect(self, quantity):
+        victims = min(quantity, self.susceptible)
+        self._susceptible[self.back_buffer] -= victims
+        self._infectious[self.back_buffer] += victims
+
+    def vaccinate(self, quantity):
+        victims = min(quantity, self.susceptible)
+        self._susceptible[self.back_buffer] -= victims
+        self._recovered[self.back_buffer] += victims
+
+    def treat(self, quantity):
+        victims = min(quantity, self.infectious)
+        self._infectious[self.back_buffer] -= victims
+        self._recovered[self.back_buffer] += victims
 
     @property
     def susceptible(self):
