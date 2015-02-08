@@ -7,21 +7,23 @@ a recent Python interpreter.
 - Open a terminal in the package folder
   with `cd path/to/COMAP-2015`
 - Assuming you want to import map data, run `python` and then
-  `>>> import formats.esri`
+  `import formats.esri`
 - The `import_population` function takes a filename for the
   map data and returns a new grid. You'll need to assign it
   to a variable:
-  `>>> population = formats.esri.import_population('hello.txt')`
+  `population = formats.esri.import_population('hello.txt')`
 - I didn't have time to implement infection and disease masks,
   so you can just enter infections manually with coordinates:
-  `>>> population.expose(victim_count, (x1,y1), (x2,y2, ...)`
-- To make it go for one timestep, call `>>> population.tick()`
+  `population.expose(victim_count, (x1,y1), (x2,y2, ...)`.
+  You can use the `infect`, `vaccinate`, and `treat` methods
+  in the same way.
+- To make it go for one timestep, call `population.tick()`
   or `population.tick(count)
 - To remove cells with too few people and possibly save time
-  on computations, call `>>> population.strip()`
+  on computations, call `population.strip()`
 - Once you have something, you can export by passing the whole
-  grid to `>>> output_population("filename.txt", population)`.
-  There is also `output_casualties` with the same usage.
+  grid to `export_population("filename.txt", population)`.
+  There is also `export_casualties` with the same usage.
   I have the Ebola turned waaaaay up, so you'll need to tweak
   the parameters. It should be mostly multiplying constants.
   I marked some places in the source code you might want to change.
