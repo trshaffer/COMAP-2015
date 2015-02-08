@@ -12,6 +12,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from random import random
+
+
 class Board:
     def __init__(self):
         self._board = {}
@@ -23,12 +26,11 @@ class Board:
 
     def potential(self, at, point):
         if at == point:
-            return 0
+            return 0.0
         else:
-            # this could be multiplied by a constant, squared, etc.
-            # the infectious part is the number of infectious people at some
-            # point and distance is that point's distance
-            return self._board[point].infectious / Board.distance(at, point) ##
+            #XXX increase this constant to spread farther
+            return 5 * self._board[point].infectious /  \
+                Board.distance(at, point)
 
     def strip(self):
         self._board = self.living
@@ -58,22 +60,29 @@ class Board:
         # this is the minimum number of people to cause the cell to be
         # processed. increasing this constant decreases computational
         # workload but ignores some data
-        return {k: v for k, v in self._board.items() if v.population >= 1}   ##
+
+        #XXX cutoff for unpopulated cel
+        return {k: v for k, v in self._board.items() if v.population >= 1}
 
     @property
     def infected(self):
-        # same as above
-        return {k: v for k, v in self._board.items() if v.infectious >= 1}   ##
+        #XXX cutoff for uninfected cell
+        return {k: v for k, v in self._board.items() if v.infectious >= 1}
 
     def tick(self, duration=1):
         for i in range(duration):
             current_living = self.living
             current_infected = self.infected
-            for c in current_living.keys():
+            for c in current_living:
                 self._board[c].tick()
                 infection_potential = 0.0
-                for i in current_infected:
+                #XXX max radius of infectivity
+                for i in {k: v for k, v in current_infected.items() \
+                        if Board.distance(k, c) < 50}:
                     infection_potential += self.potential(c, i)
-                self._board[c].infect(infection_potential)
+                #XXX decrease this constant for faster spread
+                if random() < infection_potential / 50.0:
+                    #XXX proportion of population affected by exposure event
+                    self._board[c].expose(0.25 * self._board[c].susceptible)
             for c in current_living:
                 self._board[c].flip()

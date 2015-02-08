@@ -19,7 +19,7 @@ from cel import Cel
 
 def _export_board(filepath, pop_map, selection):
     with open(filepath, 'w') as f:
-        for e in pop_map.header.keys():
+        for e in pop_map.header:
             f.write('%s %s\n' % (e, pop_map.header[e]))
         for y in range(int(pop_map.header['nrows'])):
             for x in range(int(pop_map.header['ncols'])):

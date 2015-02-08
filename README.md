@@ -1,8 +1,6 @@
 # COMAP-2015
 
-Since I'm going to be out tomorrow, I'll try to give some
-instructions on using the core functionality. You'll need
-a recent Python interpreter.
+You'll need a recent (3.x I think) Python interpreter.
 - Clone or download the repo from Github
 - Open a terminal in the package folder
   with `cd path/to/COMAP-2015`
