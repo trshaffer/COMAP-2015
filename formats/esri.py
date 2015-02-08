@@ -34,8 +34,11 @@ def _export_board(filepath, pop_map, selection):
 def population_exporter(cel):
     return cel.population
 
-def casualty_exporter(cel):
-    return cel.casualties
+def cases_exporter(cel):
+    return cel.cases
+
+def deaths_exporter(cel):
+    return cel.deaths
 
 def population_importer(val):
     return Cel(susceptible = float(val))
@@ -43,8 +46,11 @@ def population_importer(val):
 def export_population(filepath, pop_map):
     _export_board(filepath, pop_map, population_exporter)
 
-def export_casualties(filepath, pop_map):
-    _export_board(filepath, pop_map, casualty_exporter)
+def export_cases(filepath, pop_map):
+    _export_board(filepath, pop_map, cases_exporter)
+
+def export_deaths(filepath, pop_map):
+    _export_board(filepath, pop_map, deaths_exporter)
 
 def import_population(filepath):
     pop_map = Board()

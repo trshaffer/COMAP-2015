@@ -1,28 +1,65 @@
-# COMAP-2015
+COMAP-2015
+==========
 
-You'll need a recent (3.x I think) Python interpreter.
-- Clone or download the repo from Github
-- Open a terminal in the package folder
-  with `cd path/to/COMAP-2015`
-- Assuming you want to import map data, run `python` and then
-  `import formats.esri`
-- The `import_population` function takes a filename for the
-  map data and returns a new grid. You'll need to assign it
-  to a variable:
-  `population = formats.esri.import_population('hello.txt')`
-- I didn't have time to implement infection and disease masks,
-  so you can just enter infections manually with coordinates:
-  `population.expose(victim_count, (x1,y1), (x2,y2, ...)`.
-  You can use the `infect`, `vaccinate`, and `treat` methods
-  in the same way.
-- To make it go for one timestep, call `population.tick()`
-  or `population.tick(count)
-- To remove cells with too few people and possibly save time
-  on computations, call `population.strip()`
-- Once you have something, you can export by passing the whole
-  grid to `export_population("filename.txt", population)`.
-  There is also `export_casualties` with the same usage.
-  I have the Ebola turned waaaaay up, so you'll need to tweak
-  the parameters. It should be mostly multiplying constants.
-  I marked some places in the source code you might want to change.
-  I gave them two hash signs by the right margin.
+*Problem A*
+
+Megan Chambers, Tim Shaffer, Eric Shehadi
+
+formats.esri
+------------
+- `import_population(filepath)` Load an ASCII map data file and return a
+  new `Board` with the given susceptible population
+- `export_population(filepath, pop_map)` Write the given `Board` to the
+  specified path in ASCII format to be read by GIS software
+- `export_cases(filepath, pop_map)`
+- `export_deaths(filepath, pop_map)`
+
+Board
+-----
+Locations are specified as 2-tuples, e.g. `(10, 20)`
+- `tick()` Update the populations on the board according to the hybrid model.
+  In addition to the changes described in `Cel.tick()`, spread the infection
+  around to neighbors.
+- `distance(a, b)` Return the taxicab distance between points `a` and `b`
+- `circle(center, radius)` Return a set of points with `center` and `radius`
+- `strip()` Remove cells not considered to be living
+- `expose(howmany, *cels)` Expose `howmany` as described in
+  `Cel.expose(howmany)` the location(s) given by `*cels`
+- `infect(howmany, *cels)`
+- `vaccinate(howmany, *cels)`
+- `treat(howmany, *cels)`
+- `susceptible` Total number of __Susceptible__ people on the board
+- `exposed`
+- `infectious`
+- `recovered`
+- `cases` See `Cel.cases`
+- `population`
+- `initial_population`
+- `deaths`
+- `treated`
+
+Cel
+---
+- `tick()` Update the populations of the cell according to the SEIR model
+- `expose(howmany)` Move at most `howmany` people from __Susceptible__ to
+  __Exposed__
+- `infect(howmany)` Move at most `howmany` people from __Susceptible__ to
+    __Infectious__
+- `vaccinate(howmany)` Move at most `howmany` people from
+  __Susceptible__ to __Recovered__ and update the count of treated individuals
+- `treat(howmany)` Move at most `howmany` people from __Exposed__ to
+  __Recovered__ and update the count of treated individuals
+- `susceptible` The number of __Susceptible__ people in the cell
+- `exposed`
+- `infectious`
+- `recovered`
+- `population` Total number of people currently alive in the cell, i.e.
+  the sum of __Susceptible__ + __Exposed__ + __Infectious__ + __Recovered__
+- `initial_population` The number of people in the `Cel` at its creation
+- `deaths` The number of people that have died since the `Cel` was created,
+  i.e. `initial_population` - `population`
+- `treated` The number of people tho received a vaccination or treatment,
+- `cases` The cumulative number of people who have contracted the disease in
+  the cell, i.e. `infectious` + `recovered` + `deaths` - `treated`
+- `basic_reproduction_number`
+- `effective_reproduction_number`
