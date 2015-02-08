@@ -80,6 +80,42 @@ class Board:
         #XXX cutoff for uninfected cell
         return {k: v for k, v in self._board.items() if v.infectious >= 1}
 
+    @property
+    def susceptible(self):
+        return sum([c.susceptible for c in self._board.values()])
+
+    @property
+    def exposed(self):
+        return sum([c.exposed for c in self._board.values()])
+
+    @property
+    def infectious(self):
+        return sum([c.infectious for c in self._board.values()])
+
+    @property
+    def recovered(self):
+        return sum([c.recovered for c in self._board.values()])
+
+    @property
+    def cases(self):
+        return sum([c.cases for c in self._board.values()])
+
+    @property
+    def deaths(self):
+        return sum([c.deaths for c in self._board.values()])
+
+    @property
+    def treated(self):
+        return sum([c.treated for c in self._board.values()])
+
+    @property
+    def population(self):
+        return sum([c.population for c in self._board.values()])
+
+    @property
+    def initial_population(self):
+        return sum([c.initial_population for c in self._board.values()])
+
     def tick(self, duration=1):
         for i in range(duration):
             current_living = self.living

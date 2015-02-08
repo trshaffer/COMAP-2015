@@ -24,6 +24,8 @@ class Cel:
         self.initial_population = susceptible + exposed + \
             infectious + recovered
 
+        self.treated = 0
+
         self._susceptible = {}
         self._susceptible[self.front_buffer] = susceptible
         self._susceptible[self.back_buffer] = susceptible
@@ -46,22 +48,6 @@ class Cel:
         # DO NOT set these to 0
         self.incubation_duration = 5.3
         self.infectiousness_duration = 5.61
-
-    @property
-    def constants(self):
-        return {'transmission_rate': self.transmission_rate,
-                'fatality_rate': self.fatality_rate,
-                'incubation_duration': self.incubation_duration,
-                'infectiousness_duration': self.infectiousness_duration}
-
-    @property
-    def stats(self):
-        return {'susceptible': self.susceptible,
-                'exposed': self.exposed,
-                'infectious': self.infectious,
-                'recovered': self.recovered,
-                'initial_population': self.initial_population,
-                'population': self.population}
 
     def tick(self):
         self._susceptible[self.back_buffer] = self.susceptible + \
@@ -89,11 +75,13 @@ class Cel:
 
     def vaccinate(self, quantity):
         victims = min(quantity, self.susceptible)
+        self.treated += victims
         self._susceptible[self.back_buffer] -= victims
         self._recovered[self.back_buffer] += victims
 
     def treat(self, quantity):
         victims = min(quantity, self.exposed)
+        self.treated += victims
         self._exposed[self.back_buffer] -= victims
         self._recovered[self.back_buffer] += victims
 
@@ -119,9 +107,12 @@ class Cel:
             self.infectious + self.recovered
 
     @property
-    def casualties(self):
-        return self.infectious + self.initial_population - \
-            self.population
+    def deaths(self):
+        return self.initial_population - self.population
+
+    @property
+    def cases(self):
+        return self.infectious + self.recovered + self.deaths - self.treated
 
     @property
     def basic_reproduction_number(self):
