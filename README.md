@@ -14,8 +14,9 @@ a recent Python interpreter.
   `>>> population = formats.esri.import_population('hello.txt')`
 - I didn't have time to implement infection and disease masks,
   so you can just enter infections manually with coordinates:
-  `>>> population.living[84, 80]._infectious['front'] = 5`
+  `>>> population.expose(victim_count, (x1,y1), (x2,y2, ...)`
 - To make it go for one timestep, call `>>> population.tick()`
+  or `population.tick(count)
 - To remove cells with too few people and possibly save time
   on computations, call `>>> population.strip()`
 - Once you have something, you can export by passing the whole
