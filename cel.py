@@ -93,8 +93,8 @@ class Cel:
         self._recovered[self.back_buffer] += victims
 
     def treat(self, quantity):
-        victims = min(quantity, self.infectious)
-        self._infectious[self.back_buffer] -= victims
+        victims = min(quantity, self.exposed)
+        self._exposed[self.back_buffer] -= victims
         self._recovered[self.back_buffer] += victims
 
     @property

@@ -24,6 +24,17 @@ class Board:
     def distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
+    @staticmethod
+    def circle(center, radius):
+        quadrant = set()
+        for x in range(radius):
+            for y in range(radius - x):
+                quadrant.add((x, y))
+        quadrant.update({(x, -y) for (x, y) in quadrant})
+        quadrant.update({(-x, y) for (x, y) in quadrant})
+        quadrant.update({(-x, -y) for (x, y) in quadrant})
+        return {(x + center[0], y + center[1]) for (x, y) in quadrant}
+
     def potential(self, at, point):
         if at == point:
             return 0.0
