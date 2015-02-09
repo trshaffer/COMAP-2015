@@ -12,13 +12,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from time import time
 from random import random
+from math import sqrt
 
+
+exposure_proportion = 0.05
 
 class Board:
     def __init__(self):
         self._board = {}
         self.header = {}
+
+        self.days = 0
 
     # taxicab distance is the easiest to work with here
     @staticmethod
@@ -41,7 +47,7 @@ class Board:
     # this helper mimics the start of the 2014 outbreak
     def patient_zero(self, center):
         self.infect(1, center)
-        self.expose(2, Board.circle(center, 2))
+        self.expose(2, center)
 
     # the potential used here is inspired by electrostatic potential. the idea
     # is that an infected cell increases the potential (I love the ambiguity
@@ -55,8 +61,8 @@ class Board:
             return 0.0
         else:
             #XXX increase this constant to spread farther
-            return 5 * self._board[point].infectious /  \
-                Board.distance(at, point)
+            return self._board[point].infectious /  \
+                sqrt(Board.distance(at, point))
 
     # if the gameboard has VERY sparsely populated areas, this method can
     # remove cells to save on computation. this is likely a bad idea, though.
@@ -137,6 +143,10 @@ class Board:
     # this is the heart of the program.
     def tick(self, duration=1):
         for i in range(duration):
+            self.days += 1
+
+            start_time = time()
+
             # cache the dict comprehensions to avoid filtering every
             # time something happens
             current_living = self.living
@@ -157,8 +167,13 @@ class Board:
                 # potential is low (or the constant is large), nothing happens.
                 # if the scaled value goes above one, exposure is guaranteed.
                 #XXX decrease this constant for faster spread
-                if random() < infection_potential / 50.0:
+                if random() < infection_potential * \
+                        self._board[c].susceptible**1.5 * 1e-8:
                     #XXX proportion of population affected by exposure event
-                    self._board[c].expose(0.25 * self._board[c].susceptible)
+                    if self._board[c].exposed + self._board[c].infectious < \
+                            exposure_proportion * self._board[c].susceptible:
+                        self._board[c].expose(exposure_proportion * self._board[c].susceptible)
+                        print('jump!')
             for c in current_living:
                 self._board[c].flip()
+            print(time() - start_time)
