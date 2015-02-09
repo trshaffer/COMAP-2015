@@ -38,6 +38,11 @@ class Board:
         quadrant.update({(-x, -y) for (x, y) in quadrant})
         return {(x + center[0], y + center[1]) for (x, y) in quadrant}
 
+    # this helper mimics the start of the 2014 outbreak
+    def patient_zero(self, center):
+        self.infect(1, center)
+        self.expose(2, Board.circle(center, 2))
+
     # the potential used here is inspired by electrostatic potential. the idea
     # is that an infected cell increases the potential (I love the ambiguity
     # of the English language) for nearby cells to be exposed to the disease.
