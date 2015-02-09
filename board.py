@@ -72,23 +72,27 @@ class Board:
     # these methods should be used to interact with the board
     def expose(self, people, *cels):
         for c in cels:
-            self._board[c].expose(people)
-            self._board[c].flip()
+            if c in self._board:
+                self._board[c].expose(people)
+                self._board[c].flip()
 
     def infect(self, people, *cels):
         for c in cels:
-            self._board[c].infect(people)
-            self._board[c].flip()
+            if c in self._board:
+                self._board[c].infect(people)
+                self._board[c].flip()
 
     def vaccinate(self, people, *cels):
         for c in cels:
-            self._board[c].vaccinate(people)
-            self._board[c].flip()
+            if c in self._board:
+                self._board[c].vaccinate(people)
+                self._board[c].flip()
 
     def treat(self, people, *cels):
         for c in cels:
-            self._board[c].treat(people)
-            self._board[c].flip()
+            if c in self._board:
+                self._board[c].treat(people)
+                self._board[c].flip()
 
     # this is the minimum number of people to cause the cell to be
     # processed. increasing this constant decreases computational
