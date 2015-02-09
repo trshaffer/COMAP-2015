@@ -20,10 +20,13 @@ class Board:
         self._board = {}
         self.header = {}
 
+    # taxicab distance is the easiest to work with here
     @staticmethod
     def distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
+    # when infecting or vaccinating areas, this function might come in handy
+    # to cover regions
     @staticmethod
     def circle(center, radius):
         quadrant = set()
@@ -35,6 +38,13 @@ class Board:
         quadrant.update({(-x, -y) for (x, y) in quadrant})
         return {(x + center[0], y + center[1]) for (x, y) in quadrant}
 
+    # the potential used here is inspired by electrostatic potential. the idea
+    # is that an infected cell increases the potential (I love the ambiguity
+    # of the English language) for nearby cells to be exposed to the disease.
+    # a more intensely infected cell should be more likely to infect others,
+    # and this effect should drop off with distance. the function used here
+    # was chosen to be most intense near the source, drop off somewhat
+    # quickly, and approach zero.
     def potential(self, at, point):
         if at == point:
             return 0.0
@@ -43,9 +53,12 @@ class Board:
             return 5 * self._board[point].infectious /  \
                 Board.distance(at, point)
 
+    # if the gameboard has VERY sparsely populated areas, this method can
+    # remove cells to save on computation. this is likely a bad idea, though.
     def strip(self):
         self._board = self.living
 
+    # these methods should be used to interact with the board
     def expose(self, people, *cels):
         for c in cels:
             self._board[c].expose(people)
@@ -66,12 +79,11 @@ class Board:
             self._board[c].treat(people)
             self._board[c].flip()
 
+    # this is the minimum number of people to cause the cell to be
+    # processed. increasing this constant decreases computational
+    # workload but ignores some data
     @property
     def living(self):
-        # this is the minimum number of people to cause the cell to be
-        # processed. increasing this constant decreases computational
-        # workload but ignores some data
-
         #XXX cutoff for unpopulated cel
         return {k: v for k, v in self._board.items() if v.population >= 1}
 
@@ -80,6 +92,7 @@ class Board:
         #XXX cutoff for uninfected cell
         return {k: v for k, v in self._board.items() if v.infectious >= 1}
 
+    # summary info
     @property
     def susceptible(self):
         return sum([c.susceptible for c in self._board.values()])
@@ -116,17 +129,28 @@ class Board:
     def initial_population(self):
         return sum([c.initial_population for c in self._board.values()])
 
+    # this is the heart of the program.
     def tick(self, duration=1):
         for i in range(duration):
+            # cache the dict comprehensions to avoid filtering every
+            # time something happens
             current_living = self.living
             current_infected = self.infected
             for c in current_living:
+                # apply the SEIR model now since it overwrites the backbuffer
                 self._board[c].tick()
                 infection_potential = 0.0
+                # to keep computations tractable, limit the distance at which
+                # infected neighbors can affect the current cell
                 #XXX max radius of infectivity
                 for i in {k: v for k, v in current_infected.items() \
                         if Board.distance(k, c) < 50}:
                     infection_potential += self.potential(c, i)
+                # here we set the likelihood of an exposure. if neighbors have
+                # too much infection, it's guaranteed. we scale the infection
+                # potential down and compare to a uniform random value. if the
+                # potential is low (or the constant is large), nothing happens.
+                # if the scaled value goes above one, exposure is guaranteed.
                 #XXX decrease this constant for faster spread
                 if random() < infection_potential / 50.0:
                     #XXX proportion of population affected by exposure event

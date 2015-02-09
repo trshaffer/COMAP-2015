@@ -17,9 +17,15 @@
 
 class Cel:
     def __init__(self, susceptible=0, exposed=0, infectious=0, recovered=0):
+        # the front and back buffers are there to ensure that changes are
+        # applied atomically
         self.front_buffer = "front"
         self.back_buffer = "back"
-        self.timestep = 1 # probably measured in days
+        # the timestep is probably measured in days. increasing the timestep
+        # might decrease the accuracy of the linear approximations used
+        # to implement SEIR. all the constants given in the source paper were
+        # measured in days, so that's a reasonable value
+        self.timestep = 1
 
         self.initial_population = susceptible + exposed + \
             infectious + recovered
@@ -42,6 +48,7 @@ class Cel:
         self._recovered[self.front_buffer] = recovered
         self._recovered[self.back_buffer] = recovered
 
+        # these constants are chosen to match the country under consideration
         self.transmission_rate = 0.45
         self.fatality_rate = 0.48
 
@@ -50,6 +57,7 @@ class Cel:
         self.infectiousness_duration = 5.61
 
     def tick(self):
+        # SEIR gives some ODEs, so just use a linear approximation
         self._susceptible[self.back_buffer] = self.susceptible + \
             (self.timestep * self.susceptible_change)
         self._exposed[self.back_buffer] = self.exposed + \
@@ -59,10 +67,13 @@ class Cel:
         self._recovered[self.back_buffer] = self.recovered + \
             (self.timestep * self.recovered_change)
 
+    # pretty much self-explanatory: flips the buffers
     def flip(self):
         self.front_buffer, self.back_buffer = \
             self.back_buffer, self.front_buffer
 
+    # these are public functions to move people around without worrying
+    # about the buffers
     def expose(self, quantity):
         victims = min(quantity, self.susceptible)
         self._susceptible[self.back_buffer] -= victims
@@ -85,6 +96,8 @@ class Cel:
         self._exposed[self.back_buffer] -= victims
         self._recovered[self.back_buffer] += victims
 
+    # these properties should be used elsewhere to minimize dependence on
+    # manipulating the buffers directly
     @property
     def susceptible(self):
         return self._susceptible[self.front_buffer]
@@ -101,6 +114,7 @@ class Cel:
     def recovered(self):
         return self._recovered[self.front_buffer]
 
+    # now provide properties to calculate some basic stats
     @property
     def population(self):
         return self.susceptible + self.exposed + \
@@ -126,6 +140,7 @@ class Cel:
         except ZeroDivisionError:
             return 0.0
 
+    # these deltas are based on the SEIR model
     @property
     def susceptible_change(self):
         try:
