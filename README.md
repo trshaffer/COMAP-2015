@@ -17,7 +17,8 @@ formats.esri
 Board
 -----
 Locations are specified as 2-tuples, e.g. `(10, 20)`
-- `tick()` Update the populations on the board according to the hybrid model.
+- `tick(steps=1)` Update the populations on the board according to the
+  hybrid model.
   In addition to the changes described in `Cel.tick()`, spread the infection
   around to neighbors.
 - `distance(a, b)` Return the taxicab distance between points `a` and `b`
